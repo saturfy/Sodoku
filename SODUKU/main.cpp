@@ -1,5 +1,9 @@
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <vector>
+#include <array>
+#include <utility>
 
 using namespace std;
 
@@ -8,6 +12,7 @@ using namespace std;
 #define BLANK 0
 #define SPACE " "
 #define LINE "|"
+#define GRID_FULL make_pair(9,9)
 
 
 // Print Soduku grid
@@ -95,27 +100,135 @@ bool issafe(int grid[DIM][DIM], int row, int col, int num)
 	modulo 3 of their original big grid coordinates. 
 	THis in this example: (0,4) is in the ( 0 - (0 mod 3) , 4 - (4 mod 3) )
 	*/
-	return (usedin_row(grid, row, num) && usedin_col(grid, col, num) && usedin_box(grid, row - row % 3, col - col % 3, num));
+	return (!usedin_row(grid, row, num) && !usedin_col(grid, col, num) && !usedin_box(grid, row - row % 3, col - col % 3, num));
 }
+
+// this function searches for unassigned entries in the sodoku. The reference parameter is set to
+// this location and true is returned. If every entry is already assigned we return GRID FULL which is a pair greater than anything is the sodoku
+pair <int, int > get_unassigned_loc(int grid[DIM][DIM])
+{
+	for (int row = 0; row < DIM; row++)
+	{
+		for (int col = 0; col < DIM; col++)
+		{
+			if (grid[row][col] == BLANK)
+			{
+				return make_pair(row, col);
+			}
+		}
+	}
+	return GRID_FULL;
+}
+
+// implementation of the DFS algorithm to find solution to the sodoku "grid" return true if a solution is found
+/*
+Finds an entry in the grid which is unassgined, and assgins a number to it. Than it goes on unmtil every entry is filled or 
+one entry cannot be filled as required by the SODOKU rules, we backtrack and try another number in the last entry. 
+*/
+
+/*
+EXPLANATION
+
+1) Find an empty  space (if there are no empty spaces we are solved the sodoku -> RETURN TRUE)
+2) Try to fit numbers into the place with a loop (PUT IN NUMBER)
+	This can fail in two main ways
+	A) The number cannot be assigned to the entry because of sodoku rules [ISSAFE in FOR LOOP] -> try the next number in the loop
+	B) the number seems good but every variation to fill the sodoku using this number here fails
+	
+
+A) is easy to address 
+B) is handled by recursion:
+	We put the number into the grid than we call this function again. If we do this just as a call it creates an infinite recursion. This is stopped
+	by putting the call into an IF statement which is executed if one of the recursions detect a full grid and sends a true. Than we exit with a true.
+	RECURSION IS STOPPED WHEN FULL GRID IS DETECTED, THIS IS A SOLUTION
+
+	The normal way of the recursions to stop is that at some point none of numbers can be assigned to an entry because of the rules. This is case A) 
+	and this means that an ISSAFE is failed for all numbers in a FOR LOOP in a recursion.  This is where we have to  BACKTRACK.
+	This realized in a way, that the SOLVE_SODOKU function returns false when no number can be fitted (ISSAFE failed for all steps in the LOOP)
+	This stops the recursions since all possibilities are tried. This happens at the level where the SOLVE_SODOKU just failed was called. The IF STATEMENT is skipped
+	and we reset the entry to empty. The for LOOP of the caller SOLVE_SODOKU function than proceeds to try another number. 
+
+	So since a number can be wrong in two ways in an entry, the for loop has two if statements to test it. First we check the rules, and if this was cleared, we check
+	the consequences of putting the number in. THe order is important since checking the rules is faster than recursion so we check that first. The B) case is really
+	the A) case because the only point when we return false is when all numbers tried by LOOP and FAILED by ISSAFE. So we are searching for a case where the number we put in
+	produces a situation where no good substituion exist. 
+
+*/
+bool solve_sodoku(int grid[DIM][DIM])
+{
+	// if the sodoku is filled we are done, thie is the point where we detect completion
+	if (get_unassigned_loc(grid) == GRID_FULL)
+	{
+		return true;
+	}
+
+	// get a new unassgined entry location
+	pair<int, int> rnc = get_unassigned_loc(grid);   // rnc stores the row and column of the new entry
+	int row = rnc.first;
+	int col = rnc.second;
+
+	// we try out numbers between 1-9
+	for (int i = 1; i  <= 9; i++)
+	{
+		// Checking placemenet validity of the current number
+		if (issafe(grid, row, col, i))
+		{
+			// we put the valid number into the grid
+			grid[row][col] = i;
+
+			// call the function recursively until a full grid is detected in one of the recursions
+			if (solve_sodoku(grid))
+			{
+				// if the program gets to this point all of the function calls were right so we solved the sodoku  because we only return true when the grid is full
+
+				return true;
+
+			}
+			
+			// If the progam gets to this point the number is wrong because we already tried to fill in the whole sosoku using this number. WE DELETE IT
+			grid[row][col] = BLANK;
+
+		}
+
+		
+	}
+	return false;
+
+}
+
+
 
 int main()
 {
 	int grid[9][9] = 
 	{
-	{1,2,3,4,5,6,7,8,9},
-	{1,2,3,4,5,0,7,8,9},
-	{1,2,3,4,5,6,7,8,9},
-	{1,2,3,4,5,6,0,8,9},
-	{1,2,3,4,5,6,7,8,9},
-	{1,2,3,4,5,6,7,8,9},
-	{1,2,3,4,5,6,7,8,9},
-	{1,2,3,4,5,6,7,8,9},
-	{1,2,3,4,5,6,7,8,9}
+	{0,7,0,0,0,2,0,0,0},
+	{0,9,0,3,7,0,0,0,0},
+	{0,0,5,0,8,0,0,0,1} ,
+	{0,0,4,7,0,0,0,0,9},
+	{0,0,0,0,9,6,0,0,0},
+	{0,0,0,0,0,8,6,5,4},
+	{0,2,0,0,0,0,0,0,0},
+	{0,0,0,0,0,1,0,4,3},
+	{4,0,7,9,5,0,2,6,0}
 	};
 	
 	print_grid(grid);
 
-	cout << endl <<  issafe(grid, 2,3, 11);
+	cout << endl << endl;
+
+	if (true == solve_sodoku(grid))
+	{
+		// we print the grid if we found a solution
+		print_grid(grid);
+
+	}
+	else
+	{
+		cout << "NO SOLUTION";
+	}
+
+
 
 	string s;
 	getline(cin,s);
