@@ -14,7 +14,7 @@ using namespace std;
 #define LINE "|"
 #define GRID_FULL make_pair(9,9)
 
-
+int dc = 0; // difficulty number, counts the number of recursions
 // Print Soduku grid
 void print_grid(int grid[DIM][DIM])
 {
@@ -162,6 +162,9 @@ bool solve_sodoku(int grid[DIM][DIM])
 		return true;
 	}
 
+	// count the number of function calls
+	dc++;
+
 	// get a new unassgined entry location
 	pair<int, int> rnc = get_unassigned_loc(grid);   // rnc stores the row and column of the new entry
 	int row = rnc.first;
@@ -202,15 +205,15 @@ int main()
 {
 	int grid[9][9] = 
 	{
-	{0,7,0,0,0,2,0,0,0},
-	{0,9,0,3,7,0,0,0,0},
-	{0,0,5,0,8,0,0,0,1} ,
-	{0,0,4,7,0,0,0,0,9},
-	{0,0,0,0,9,6,0,0,0},
-	{0,0,0,0,0,8,6,5,4},
-	{0,2,0,0,0,0,0,0,0},
-	{0,0,0,0,0,1,0,4,3},
-	{4,0,7,9,5,0,2,6,0}
+	{0,5,3,0,0,0,0,0,0},
+	{0,0,0,0,0,0,3,0,7},
+	{0,2,0,0,0,0,8,9,0} ,
+	{9,0,0,0,0,0,2,0,6},
+	{0,1,0,0,0,0,0,4,0},
+	{0,0,6,3,0,0,0,0,0},
+	{0,9,5,0,7,0,0,0,3},
+	{0,0,0,0,8,0,0,0,0},
+	{0,4,0,6,0,2,0,0,0}
 	};
 	
 	print_grid(grid);
@@ -221,6 +224,7 @@ int main()
 	{
 		// we print the grid if we found a solution
 		print_grid(grid);
+		cout << endl << endl << "Number of recursions : " << dc;
 
 	}
 	else
