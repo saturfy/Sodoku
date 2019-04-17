@@ -199,23 +199,53 @@ bool solve_sodoku(int grid[DIM][DIM])
 
 }
 
+// this fucntion reads the soduku from the user line by line
+// the function takes the array by reference because we have to change it. THis is like taking it with pointer just safer
+void  input_grid(int (&grid)[DIM][DIM])
+{
+	char curline[10];
+	cout << "Enter the sodoku line by line. Treat one line as a 9 digit number, use zeros to represent empty entries. After a line is eneterd press enter." << endl;
+	for (int i = 0; i < 9; i++)
+	{
+		cout << "line  " << i+1 << " : ";
+		cin.getline(curline,10);
+		
+		for (int j = 0; j < 9; j++)
+		{
+			grid[i][j] = curline[j]-'0';  
+			/*
+			this forces conversation of char into int because of "-". This converts both char and '0' into their ascii code decimal. 
+			Problem is that the number's ascii code are  not themselves, they start at 48 by zero. SO to finish the conversion we have to decreasae the converted int value.
+			0..9 are after each other in the ascii so by subtracting 0 ascii code we convert the into numbers correctly.
+			Example: char 8 -> 56; 0-> 48; : 56- 48 = 8, is the correct number. 
+			a more verbose solution is forced conversion
+			((int)curline[j])-48;
+			*/
+		}
+	}
+}
+
 
 
 int main()
 {
 	int grid[9][9] = 
 	{
-	{0,5,3,0,0,0,0,0,0},
-	{0,0,0,0,0,0,3,0,7},
-	{0,2,0,0,0,0,8,9,0} ,
-	{9,0,0,0,0,0,2,0,6},
-	{0,1,0,0,0,0,0,4,0},
-	{0,0,6,3,0,0,0,0,0},
-	{0,9,5,0,7,0,0,0,3},
-	{0,0,0,0,8,0,0,0,0},
-	{0,4,0,6,0,2,0,0,0}
+	{0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0} ,
+	{0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0}
 	};
 	
+
+	
+	input_grid(grid);
+
 	print_grid(grid);
 
 	cout << endl << endl;
