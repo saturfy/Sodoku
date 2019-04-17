@@ -203,12 +203,12 @@ bool solve_sodoku(int grid[DIM][DIM])
 // the function takes the array by reference because we have to change it. THis is like taking it with pointer just safer
 void  input_grid(int (&grid)[DIM][DIM])
 {
-	char curline[10];
+	char curline[256];
 	cout << "Enter the sodoku line by line. Treat one line as a 9 digit number, use zeros to represent empty entries. After a line is eneterd press enter." << endl;
 	for (int i = 0; i < 9; i++)
 	{
 		cout << "line  " << i+1 << " : ";
-		cin.getline(curline,10);
+		cin.getline(curline,256);
 		
 		for (int j = 0; j < 9; j++)
 		{
